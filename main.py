@@ -1,5 +1,8 @@
+from termo import Termo
+
 def main():
-    print("Hello from termo!")
+    termo = Termo("termo")
+    print(termo.guess("termo"))
 
 
 if __name__ == "__main__":

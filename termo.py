@@ -1,10 +1,26 @@
+import random
+import unicodedata
+import os
+
 class Termo:
-    def __init__(self, word: str) -> None:
-        self.word = word
-    
+    def __init__(self, word: str = None) -> None:
+        if word is None:
+            file_path = os.path.join(os.path.dirname(__file__), 'cinco_letras.txt')
+            with open(file_path, 'r', encoding='utf-8') as f:
+                words = [line.strip() for line in f if line.strip()]
+            self.word = random.choice(words)
+        else:
+            self.word = word
+            
+    def _normalize(self, text: str) -> str:
+        # Lowercase and remove accents/punctuation
+        return unicodedata.normalize('NFKD', text.lower()).encode('ascii', 'ignore').decode('ascii')
+
     def guess(self, guess: str) -> list[int]:
-        return [
-            2 if w == g else 1 if g in self.word else 0
-            for w, g in zip(self.word, guess)
-        ]
+        norm_word = self._normalize(self.word)
+        norm_guess = self._normalize(guess)
         
+        return [
+            2 if w == g else 1 if g in norm_word else 0
+            for w, g in zip(norm_word, norm_guess)
+        ]
