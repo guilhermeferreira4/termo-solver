@@ -24,3 +24,7 @@ class Termo:
             2 if w == g else 1 if g in norm_word else 0
             for w, g in zip(norm_word, norm_guess)
         ]
+
+def filter_words(word_list: list[str], guess: str, result: list[int]) -> list[str]:
+    """Filters a list of words, returning only those that match the given guess result."""
+    return [word for word in word_list if Termo(word).guess(guess) == result]

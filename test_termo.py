@@ -42,5 +42,15 @@ class TestTermo(unittest.TestCase):
         game = Termo("Açude")
         self.assertEqual(game.guess("aCUdE"), [2, 2, 2, 2, 2])
 
+    def test_filter_words(self):
+        from termo import filter_words
+        word_list = ["apple", "ample", "apply", "peach", "maple"]
+        # With current guess logic, Termo("ample").guess("apple") returns [2, 1, 2, 2, 2]
+        self.assertEqual(filter_words(word_list, "apple", [2, 1, 2, 2, 2]), ["ample"])
+
+        # Termo("ample").guess("peach") returns [1, 1, 1, 0, 0]
+        # But so does Termo("apple") and Termo("maple")
+        self.assertEqual(filter_words(word_list, "peach", [1, 1, 1, 0, 0]), ["apple", "ample", "maple"])
+
 if __name__ == "__main__":
     unittest.main()
