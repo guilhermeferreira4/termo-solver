@@ -2,6 +2,10 @@ import random
 import unicodedata
 import os
 
+def normalize_word(text: str) -> str:
+    """Lowercase and remove accents/punctuation"""
+    return unicodedata.normalize('NFKD', text.lower()).encode('ascii', 'ignore').decode('ascii')
+
 class Termo:
     def __init__(self, word: str = None) -> None:
         if word is None:
@@ -11,14 +15,10 @@ class Termo:
             self.word = random.choice(words)
         else:
             self.word = word
-            
-    def _normalize(self, text: str) -> str:
-        # Lowercase and remove accents/punctuation
-        return unicodedata.normalize('NFKD', text.lower()).encode('ascii', 'ignore').decode('ascii')
 
     def guess(self, guess: str) -> list[int]:
-        norm_word = self._normalize(self.word)
-        norm_guess = self._normalize(guess)
+        norm_word = normalize_word(self.word)
+        norm_guess = normalize_word(guess)
         
         return [
             2 if w == g else 1 if g in norm_word else 0
@@ -28,3 +28,28 @@ class Termo:
 def filter_words(word_list: list[str], guess: str, result: list[int]) -> list[str]:
     """Filters a list of words, returning only those that match the given guess result."""
     return [word for word in word_list if Termo(word).guess(guess) == result]
+
+def score_letters(word_list: list[str]) -> dict[str, int]:
+    """
+    Counts the frequency of each letter across the remaining valid words.
+    Repeated characters in a single word only count once.
+    """
+    freq = {}
+    for word in word_list:
+        norm_word = set(normalize_word(word))
+        for char in norm_word:
+            freq[char] = freq.get(char, 0) + 1
+    return freq
+
+def sort_words_by_score(word_list: list[str]) -> list[str]:
+    """
+    Sorts a list of words in descending order based on their score.
+    A word's score is the sum of the frequencies of its unique letters.
+    """
+    freq = score_letters(word_list)
+    
+    def get_score(word: str) -> int:
+        norm_chars = set(normalize_word(word))
+        return sum(freq.get(char, 0) for char in norm_chars)
+        
+    return sorted(word_list, key=lambda w: (-get_score(w), w))

@@ -52,5 +52,35 @@ class TestTermo(unittest.TestCase):
         # But so does Termo("apple") and Termo("maple")
         self.assertEqual(filter_words(word_list, "peach", [1, 1, 1, 0, 0]), ["apple", "ample", "maple"])
 
+    def test_score_letters(self):
+        from termo import score_letters
+        word_list = ["mamao", "papel"]
+        # mamao -> m, a, o
+        # papel -> p, a, e, l
+        # a: 2, m: 1, o: 1, p: 1, e: 1, l: 1
+        expected = {'a': 2, 'm': 1, 'o': 1, 'p': 1, 'e': 1, 'l': 1}
+        self.assertEqual(score_letters(word_list), expected)
+
+    def test_score_letters_with_accents(self):
+        from termo import score_letters
+        word_list = ["Ações", "Ábaco"]
+        # acoes -> a, c, o, e, s
+        # abaco -> a, b, c, o
+        # a: 2, c: 2, o: 2, e: 1, s: 1, b: 1
+        expected = {'a': 2, 'c': 2, 'o': 2, 'e': 1, 's': 1, 'b': 1}
+        self.assertEqual(score_letters(word_list), expected)
+
+    def test_sort_words_by_score(self):
+        from termo import sort_words_by_score
+        word_list = ["mamao", "papel", "meloa"]
+        # Frequencies:
+        # m: 2, a: 3, o: 2, p: 1, e: 2, l: 2
+        # Scores (unique letters only):
+        # mamao: m(2) + a(3) + o(2) = 7
+        # papel: p(1) + a(3) + e(2) + l(2) = 8
+        # meloa: m(2) + e(2) + l(2) + o(2) + a(3) = 11
+        # Expected sort: meloa (11), papel (8), mamao (7)
+        self.assertEqual(sort_words_by_score(word_list), ["meloa", "papel", "mamao"])
+
 if __name__ == "__main__":
     unittest.main()
