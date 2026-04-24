@@ -1,47 +1,54 @@
-from termo import Termo, filter_words, score_letters, sort_words_by_score
+from termo import Termo, filter_words, sort_words_by_score
 import random
 import os
+
+def play_game(secret_word: str, all_words: list[str], initial_guess: str) -> int:
+    termo = Termo(secret_word)
+    valid_words = all_words.copy()
+    
+    tentativas = 1
+    guess = initial_guess
+    
+    while True:
+        guess_result = termo.guess(guess)
+        
+        if guess_result == [2, 2, 2, 2, 2]:
+            return tentativas
+            
+        valid_words = filter_words(valid_words, guess, guess_result)
+        
+        if not valid_words:
+            # Fallback for unexpected situations
+            return tentativas
+            
+        sorted_words = sort_words_by_score(valid_words)
+        guess = sorted_words[0]
+        tentativas += 1
 
 def main():
     file_path = os.path.join(os.path.dirname(__file__), 'cinco_letras.txt')
     with open(file_path, 'r', encoding='utf-8') as f:
         words = [line.strip() for line in f if line.strip()]
-    word = random.choice(words)
 
-    termo = Termo(word)
-    valid_words = words.copy()
+    print("Calculando a melhor palavra inicial...")
+    initial_guess = sort_words_by_score(words)[0]
+    print(f"Melhor palavra inicial: {initial_guess}")
+
+    num_games = 100
+    total_attempts = 0
     
-    print("Bem-vindo ao Termo!")
-    # print(f"(Dica para debugar: a palavra é '{word}')\n")
-    print(f"Sugestões iniciais: {sort_words_by_score(valid_words)[:10]}\n")
+    print(f"\nIniciando simulação de {num_games} jogos...")
+    
+    for i in range(num_games):
+        secret_word = random.choice(words)
+        attempts = play_game(secret_word, words, initial_guess)
+        total_attempts += attempts
+        
+        if (i + 1) % 10 == 0:
+            print(f"Progresso: {i + 1}/{num_games} jogos concluídos...")
 
-    tentativas = 1
-    while tentativas <= 6:
-        guess = input(f"Tentativa {tentativas}/6: ").strip().lower()
-        if len(guess) != 5:
-            print("A palavra deve ter 5 letras.")
-            continue
-            
-        guess_result = termo.guess(guess)
-        print(f'Resultado: {guess_result}')
-        
-        if guess_result == [2, 2, 2, 2, 2]:
-            print(f'\nParabéns! Você acertou a palavra "{word}"!')
-            break
-            
-        valid_words = filter_words(valid_words, guess, guess_result)
-        sorted_words = sort_words_by_score(valid_words)
-        
-        print(f'Palavras restantes: {len(valid_words)}')
-        if valid_words:
-            print(f'Melhores palavras para a próxima tentativa:\n{sorted_words[:10]}\n')
-        else:
-            print("Nenhuma palavra na lista atende aos critérios.")
-            break
-            
-        tentativas += 1
-    else:
-        print(f'\nFim de jogo. A palavra era "{word}".')
+    avg_attempts = total_attempts / num_games
+    print(f"\nMédia de tentativas necessárias para vencer: {avg_attempts:.2f}")
 
 if __name__ == "__main__":
     main()

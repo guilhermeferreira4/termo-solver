@@ -26,7 +26,6 @@ class Termo:
         ]
 
 def filter_words(word_list: list[str], guess: str, result: list[int]) -> list[str]:
-    """Filters a list of words, returning only those that match the given guess result."""
     return [word for word in word_list if Termo(word).guess(guess) == result]
 
 def score_letters(word_list: list[str]) -> dict[str, int]:
